@@ -33,7 +33,7 @@ class EarthquakeDataset(Dataset):
         
         # Pad the velocity sequence (x) with zeros to match the maximum length
         padded_x = torch.zeros(self.max_length, dtype=torch.float32)
-        padded_x[:x.size(0)] = x * 1e14
+        padded_x[:x.size(0)] = x * 1e10
         padded_y = torch.zeros(self.max_length, dtype=torch.float32)
         padded_y[:y.size(0)] = y
 

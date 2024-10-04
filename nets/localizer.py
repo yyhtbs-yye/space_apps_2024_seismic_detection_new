@@ -21,7 +21,7 @@ class FPN1DLocalizer(nn.Module):
             in_channels = mid_channels
 
         # Max pooling layers for downsampling
-        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
+        self.pool = nn.AvgPool1d(kernel_size=2, stride=2)
 
         # Bottleneck layer
         bottleneck_out_channels = in_channels
@@ -105,7 +105,8 @@ class SimpleCNNLocalizer(nn.Module):
             self.conv_blocks.append(nn.Sequential(
                 nn.Conv1d(in_channels, mid_channels, kernel_size=kernel_size, padding=kernel_size//2),
                 nn.ReLU(inplace=True),
-                nn.MaxPool1d(kernel_size=2, stride=2)
+                nn.Conv1d(mid_channels, mid_channels, kernel_size=kernel_size, padding=kernel_size//2),
+                nn.AvgPool1d(kernel_size=2, stride=2)
             ))
             in_channels = mid_channels  # Keep channels constant after the first layer
         
@@ -114,10 +115,10 @@ class SimpleCNNLocalizer(nn.Module):
         
         # Fully connected layers for regression
         self.fc = nn.Sequential(
-            nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
+            # nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
             nn.Linear(mid_channels, 64),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
+            # nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
             nn.Linear(64, 1),
             nn.Sigmoid(),  # If labels are between 0 and 1
         )

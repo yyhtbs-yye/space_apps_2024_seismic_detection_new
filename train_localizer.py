@@ -12,7 +12,7 @@ from nets.localizer import SimpleCNNLocalizer as Localizer
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyperparameters
-batch_size = 7
+batch_size = 76
 num_epochs = 2000
 learning_rate = 0.0001
 
@@ -48,9 +48,9 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()  # Zero the parameter gradients
         loss.backward()  # Compute gradients
 
-        for param in model.parameters():
-            if param.grad is not None:
-                print(param.grad.norm())
+        # for param in model.parameters():
+        #     if param.grad is not None:
+        #         print(param.grad.norm())
 
         optimizer.step()  # Update parameters
         
