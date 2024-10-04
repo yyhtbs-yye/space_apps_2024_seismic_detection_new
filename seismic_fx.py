@@ -36,5 +36,5 @@ def stalta_classic(t, signal, fs, sta_factor=5, lta_factor=30, is_centred=False)
     sta_lta_ratios = sta_out / lta_out.replace(0, np.nan)  # Prevent division by zero by replacing 0s with NaN
     sta_lta_ratios = sta_lta_ratios.fillna(0)  # Replace NaNs from division by zero with 0
     
-    return sta_lta_ratios, sta_out, lta_out
+    return sta_lta_ratio, sta_out, lta_out
 
