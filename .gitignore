@@ -8,3 +8,4 @@ raw_signals_and_samples/*
 __pycache__
 .ipynb_checkpoints
 analysis_script.ipynb
+*.pth

@@ -18,8 +18,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyperparameters
 batch_size = 76
-num_epochs = 100
-learning_rate = 0.001
+num_epochs = 2000
+learning_rate = 0.0001
 
 # Dataset and DataLoader
 train_dataset = EarthquakeDataset(csv_folder='downsampled_signals_and_sampels/S12_GradeA/')
@@ -67,6 +67,8 @@ for epoch in range(num_epochs):
 
     print(f'Epoch [{epoch+1}/{num_epochs}] completed. Average Loss: {running_loss / len(train_loader):.9f}')
 
+    if epoch % 10 == 0:
+        torch.save(model.state_dict(), f'quake_localization_model_{epoch:05}.pth')
 
-# Save the trained model
-torch.save(model.state_dict(), 'quake_localization_model.pth')
+
+

@@ -41,11 +41,15 @@ class EarthquakeDataset(Dataset):
                 padded_y = padded_y.long()
 
             else:
-                padded_y = None
-                timestamp_percentage = None
+                padded_y = []
+                timestamp_percentage = []
 
-            # Store padded data and timestamp percentage
-            self.data.append((padded_x.view(1, -1), padded_y, timestamp_percentage))
+            if is_testing:
+                # Store padded data and timestamp percentage
+                self.data.append((padded_x.view(1, -1), padded_y, timestamp_percentage, csv_path))
+            else:
+                # Store padded data and timestamp percentage
+                self.data.append((padded_x.view(1, -1), padded_y, timestamp_percentage))
 
     def __len__(self):
         return len(self.csv_files)

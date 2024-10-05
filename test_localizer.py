@@ -14,7 +14,7 @@ def log_memory_usage():
 
 # ------------------------------------------------------------
 # Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 
 # Hyperparameters
 batch_size = 76
@@ -29,11 +29,11 @@ train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=
 model = Localizer().to(device)
 
 # Load the saved model parameters
-model.load_state_dict(torch.load('quake_localization_model.pth'))
+model.load_state_dict(torch.load('quake_localization_model_00060.pth'))
 
 
 batch = next(iter(train_loader))
 
-model(batch[0])
+model(batch[0].to(device))
 
 a = 1
