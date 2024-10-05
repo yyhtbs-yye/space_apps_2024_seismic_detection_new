@@ -17,10 +17,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyperparameters
 batch_size = 76
 num_epochs = 2000
-learning_rate = 0.001
+learning_rate = 0.01
 
 # Dataset and DataLoader
-train_dataset = EarthquakeDataset(csv_folder='data/lunar/test/downsample_data/S12_GradeB/')
+train_dataset = EarthquakeDataset(data_folder='data/lunar/training/downsample_data/S12_GradeA/',
+                                  label_folder='data/lunar/training/label/S12_GradeA/')
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
 initial_sta_length, initial_lta_length = 60, 200
@@ -94,7 +95,8 @@ for epoch in range(num_epochs):
     print(f'Accuracy: {accuracy:.9f}, Precision: {precision:.9f}, Recall: {recall:.9f}, F1 Score: {f1_score:.9f}')
 
 
+    if epoch % 10 == 0:
+        torch.save(model.state_dict(), f'quake_detection_model_{epoch:05}.pth')
+
     print(f'Epoch [{epoch+1}/{num_epochs}] completed. Average Loss: {running_loss / len(train_loader):.9f}')
 
-# Save the trained model
-torch.save(model.state_dict(), 'quake_detection_model.pth')

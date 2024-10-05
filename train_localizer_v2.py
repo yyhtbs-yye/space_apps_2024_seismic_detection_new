@@ -4,8 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from dataset import EarthquakeDataset
-# from nets.localizer import FPN1DLocalizer as Localizer
-from nets.localizer import SimpleCNNLocalizer as Localizer
+from nets.localizer import FPN1DLocalizer as Localizer
 from tools import mkdir
 import psutil
 
@@ -15,7 +14,7 @@ def log_memory_usage():
 
 # ------------------------------------------------------------
 # Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:4' if torch.cuda.is_available() else 'cpu')
 
 # Hyperparameters
 batch_size = 76
@@ -28,14 +27,14 @@ train_dataset = EarthquakeDataset(data_folder='data/lunar/training/downsample_da
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=False)
 
 # Model
-model = Localizer(num_layers=10, in_channels=1, mid_channels=12, kernel_size=13).to(device)
+model = Localizer(num_pools=4, in_channels=1, mid_channels=12, kernel_size=13).to(device)
 
 # Loss function and optimizer
 # For classification with imbalance, using CrossEntropyLoss with class weights
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-pth_path = "save/localizer/trial_0/"
+pth_path = "save/localizer/trial_2/"
 
 mkdir(pth_path)
 

@@ -22,18 +22,20 @@ num_epochs = 2000
 learning_rate = 0.0001
 
 # Dataset and DataLoader
-train_dataset = EarthquakeDataset(csv_folder='data/lunar/test/downsample_data/S12_GradeB/', is_testing=True)
-train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=False)
+test_dataset = EarthquakeDataset(data_folder='data/lunar/test/downsample_data/S12_GradeB/',
+                                  label_folder=None, is_testing=True)
+
+test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 # Model
-model = Localizer().to(device)
+model = Localizer(num_layers=7, in_channels=1, mid_channels=8, kernel_size=13).to(device)
 
 # Load the saved model parameters
-model.load_state_dict(torch.load('quake_localization_model_00060.pth'))
+model.load_state_dict(torch.load('save/localizer/trial_0/quake_localization_model_01620.pth'))
 
 
-batch = next(iter(train_loader))
+batch = next(iter(test_loader))
 
-model(batch[0].to(device))
+pred = model(batch[0].to(device)).flatten()
 
 a = 1

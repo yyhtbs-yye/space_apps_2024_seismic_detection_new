@@ -4,34 +4,36 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
 class EarthquakeDataset(Dataset):
-    def __init__(self, csv_folder, is_testing=False):
-        self.csv_folder = csv_folder
-        self.csv_files = [f for f in os.listdir(csv_folder) if f.endswith('.csv')]
+    def __init__(self, data_folder, label_folder, is_testing=False):
+        self.data_folder = data_folder
+        self.label_folder = label_folder
+        self.csv_files = [f for f in os.listdir(data_folder) if f.endswith('.csv')]
         self.max_length = -1
-        self.data = []  # List to store preloaded and padded data (padded_x, padded_y, timestamp_percentage)
+        self.data = []  
 
         # Determine the maximum sequence length first
         for csv_file in self.csv_files:
-            csv_path = os.path.join(self.csv_folder, csv_file)
-            df = pd.read_csv(csv_path)
+            data_csv_path = os.path.join(self.data_folder, csv_file)
+            df = pd.read_csv(data_csv_path)
             length = len(df['velocity(m/s)'].values)
             if length > self.max_length:
                 self.max_length = length
 
         # Preload and pad all CSV data
         for csv_file in self.csv_files:
-            csv_path = os.path.join(self.csv_folder, csv_file)
-            df = pd.read_csv(csv_path)
+            data_csv_path = os.path.join(self.data_folder, csv_file)
+            data_df = pd.read_csv(data_csv_path)
 
             # Get velocity and label as tensors
-            x = torch.tensor(df['velocity(m/s)'].values, dtype=torch.float32)
+            x = torch.tensor(data_df['velocity(m/s)'].values, dtype=torch.float32)
             # Pad the velocity (x) and label (y) sequences to match the maximum length
             padded_x = torch.zeros(self.max_length, dtype=torch.float32)
             padded_x[:x.size(0)] = x * 1e10  # Scaling factor
 
             if not is_testing:
-
-                y = torch.tensor(df['label'].values, dtype=torch.float32)
+                label_csv_path = os.path.join(self.label_folder, csv_file)
+                label_df = pd.read_csv(label_csv_path)
+                y = torch.tensor(label_df['label'].values, dtype=torch.float32)
                 padded_y = torch.zeros(self.max_length, dtype=torch.float32)
                 padded_y[:y.size(0)] = y
                 # Calculate timestamp percentage
@@ -46,7 +48,7 @@ class EarthquakeDataset(Dataset):
 
             if is_testing:
                 # Store padded data and timestamp percentage
-                self.data.append((padded_x.view(1, -1), padded_y, timestamp_percentage, csv_path))
+                self.data.append((padded_x.view(1, -1), padded_y, timestamp_percentage, csv_file))
             else:
                 # Store padded data and timestamp percentage
                 self.data.append((padded_x.view(1, -1), padded_y, timestamp_percentage))
@@ -60,8 +62,9 @@ class EarthquakeDataset(Dataset):
 
 if __name__ == "__main__":  # Test Code
     # Assuming all your CSV files are stored in the folder 'downsampled_signals_and_sampels/'
-    csv_folder = 'downsampled_signals_and_sampels/'
-    dataset = EarthquakeDataset(csv_folder)
+    data_folder = 'downsampled_signals_and_sampels/'
+    label_folder = 'downsampled_signals_and_sampels/'
+    dataset = EarthquakeDataset(data_folder, label_folder)
 
     # Create a DataLoader to load the data in batches
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True)

@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 class FPN1DLocalizer(nn.Module):
-    def __init__(self, num_pools=10, features=256, in_channels=1, mid_channels=64, kernel_size=31):
+    def __init__(self, num_pools=10, in_channels=1, mid_channels=64, kernel_size=31):
         super(FPN1DLocalizer, self).__init__()
         
         self.num_pools = num_pools
@@ -42,12 +42,11 @@ class FPN1DLocalizer(nn.Module):
             nn.AdaptiveMaxPool1d(output_size=output_size) for output_size in [1, 4, 8, 16]  # Pyramid with different scales
         ])
 
-        # Global pooling to reduce to 256 features
-        self.global_pooling = nn.AdaptiveAvgPool1d(features)
+        self.global_pool = nn.AdaptiveMaxPool1d(256)
 
         # Final fully connected layer to produce timestamp percentage
         self.fc = nn.Sequential(
-            nn.LazyLinear(128),
+            nn.Linear(256, 128),
             nn.ReLU(inplace=True),
             nn.Linear(128, 64),
             nn.ReLU(inplace=True),
@@ -83,7 +82,7 @@ class FPN1DLocalizer(nn.Module):
         spp_features_flat = torch.cat([feat.view(feat.size(0), -1) for feat in spp_features], dim=1)
         
         # Global pooling to 256 features
-        x = self.global_pooling(spp_features_flat.unsqueeze(2))
+        x = self.global_pool(spp_features_flat)
         
         # Flatten for fully connected layer
         x = x.view(x.size(0), -1)
@@ -115,10 +114,10 @@ class SimpleCNNLocalizer(nn.Module):
         
         # Fully connected layers for regression
         self.fc = nn.Sequential(
-            # nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
+            nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
             nn.Linear(mid_channels, 64),
             nn.ReLU(inplace=True),
-            # nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
+            nn.Dropout(p=0.5),  # Apply dropout to reduce overfitting
             nn.Linear(64, 1),
             nn.Sigmoid(),  # If labels are between 0 and 1
         )
