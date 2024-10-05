@@ -7,18 +7,23 @@ from dataset import EarthquakeDataset
 # from nets.localizer import FPN1DLocalizer as Localizer
 from nets.localizer import SimpleCNNLocalizer as Localizer
 
+import psutil
+def log_memory_usage():
+    process = psutil.Process()
+    print(f"Memory Usage: {process.memory_info().rss / (1024 ** 3)} GB")  # RSS in GB
+
 # ------------------------------------------------------------
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyperparameters
 batch_size = 76
-num_epochs = 2000
-learning_rate = 0.0001
+num_epochs = 100
+learning_rate = 0.001
 
 # Dataset and DataLoader
 train_dataset = EarthquakeDataset(csv_folder='downsampled_signals_and_sampels/S12_GradeA/')
-train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=False)
 
 # Model
 model = Localizer().to(device)
@@ -30,10 +35,16 @@ optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
 
 # Training loop
 for epoch in range(num_epochs):
-    model.train()  # Set the model to training mode
+
+    log_memory_usage()  # Track memory at the start of each epoch
+
+    print(f"Memory usage: {psutil.virtual_memory().percent}%")
+    print(f"Number of threads: {psutil.Process().num_threads()}")
+
+    model.train()  # Set the model to 4training mode
     running_loss = 0.0
 
-    for i, (x, y, p) in enumerate(train_loader):
+    for i, (x, y, p) in enumerate(train_loader):    
         x = x.to(device)  # Send input to device (CPU/GPU)
         
         p = p.to(device)  # Send labels to device (CPU/GPU)
@@ -48,12 +59,7 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()  # Zero the parameter gradients
         loss.backward()  # Compute gradients
 
-        # for param in model.parameters():
-        #     if param.grad is not None:
-        #         print(param.grad.norm())
-
         optimizer.step()  # Update parameters
-        
 
         running_loss += loss.item()
 
@@ -63,4 +69,4 @@ for epoch in range(num_epochs):
 
 
 # Save the trained model
-torch.save(model.state_dict(), 'quake_detection_model.pth')
+torch.save(model.state_dict(), 'quake_localization_model.pth')

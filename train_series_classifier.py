@@ -15,12 +15,12 @@ from utils import calculate_confusion_matrix
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyperparameters
-batch_size = 32
-num_epochs = 20
+batch_size = 76
+num_epochs = 2000
 learning_rate = 0.001
 
 # Dataset and DataLoader
-train_dataset = EarthquakeDataset(csv_folder='downsampled_signals_and_sampels/S12_GradeA/')
+train_dataset = EarthquakeDataset(csv_folder='data/lunar/test/downsample_data/S12_GradeB/')
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
 initial_sta_length, initial_lta_length = 60, 200
@@ -36,7 +36,7 @@ def compute_class_weights(labels):
 
 # Assuming y is a list or array of labels
 y_labels = []
-for _, y in train_dataset:
+for _, y, _ in train_dataset:
     y_labels.extend(y.tolist())  # Assuming y is a tensor
 class_weights = compute_class_weights(y_labels)
 
@@ -53,7 +53,7 @@ for epoch in range(num_epochs):
 
     for i, (x, y, p) in enumerate(train_loader):
         x = x.to(device)  # Send input to device (CPU/GPU)
-        y = y.to(device)  # Send labels to device (CPU/GPU)
+        y = y.to(device)  # Send label to device (CPU/GPU)
 
         # Forward pass
         outputs, slta = model(x)
@@ -80,8 +80,8 @@ for epoch in range(num_epochs):
         total_TN += TN
         total_FN += FN
 
-        if (i+1) % 10 == 0:  # Print every 10 batches
-            print(f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.9f}')
+        # if (i+1) % 10 == 0:  # Print every 10 batches
+        #     print(f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.9f}')
 
     # Calculate metrics based on the confusion matrix
     accuracy = (total_TP + total_TN) / (total_TP + total_FP + total_TN + total_FN)

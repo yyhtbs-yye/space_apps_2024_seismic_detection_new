@@ -73,9 +73,6 @@ class QuakeDetectionNet(nn.Module):
 
     def forward(self, x):
 
-        x = x.unsqueeze(1)
-        # x is assumed to be of shape (B_, 1, T_)
-
         # Get STA, LTA, and STA/LTA ratio from the learnable window layers
         sta, lta, sta_lta_ratio = self.sta_lta_layer(x)
 
